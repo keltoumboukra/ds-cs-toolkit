@@ -25,8 +25,9 @@ categories = ["All Categories"] + raw_data["categories"].dropna().unique().tolis
 # Define the visualization options as a proper list
 chart_options = ["Revenue Over Time", "Revenue by Category", "Top Products"]
 
-start_date = raw_data["order_date"].min().date() if not raw_data.empty else datetime.date(2020, 1, 1)
-end_date = raw_data["order_date"].max().date() if not raw_data.empty else datetime.date(2023, 12, 31)
+# Convert string dates to datetime objects first
+start_date = pd.to_datetime(raw_data["order_date"].min()).date() if not raw_data.empty else datetime.date(2020, 1, 1)
+end_date = pd.to_datetime(raw_data["order_date"].max()).date() if not raw_data.empty else datetime.date(2023, 12, 31)
 selected_category = "All Categories"
 selected_tab = "Revenue Over Time"  # Set default selected tab
 total_revenue = "$0.00"
