@@ -63,4 +63,4 @@ def generate(nrows: int, filename: str):
     df = pl.DataFrame(columns)
     df.write_csv(filename, separator=',',include_header=True)  # Ensure comma is used as the delimiter
 # Generate 100,000 rows of data with random order_date and save to CSV
-generate(100_000, "/mnt/d/sales_data/sales_data.csv")
+generate(100_000, "sales_data/sales_data.csv")
