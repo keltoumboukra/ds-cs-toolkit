@@ -165,3 +165,11 @@ with tgb.Page() as page:
     tgb.text("## Raw Data", mode="md")
     tgb.table(data="{raw_data}")
 
+Gui(page).run(
+    title="Sales Dashboard",
+    dark_mode=False,
+    debug=True,
+    port="auto",
+    allow_unsafe_werkzeug=True,
+    async_mode="threading"
+)
