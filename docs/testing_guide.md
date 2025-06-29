@@ -79,28 +79,6 @@ def test_function_name():
     assert result == "expected_output"
 ```
 
-### Example: Testing a Simple Function
-
-```python
-# Function to test
-def add_numbers(a: int, b: int) -> int:
-    """Add two numbers together."""
-    return a + b
-
-# Test for the function
-def test_add_numbers():
-    """Test that add_numbers correctly adds two positive integers."""
-    # Arrange
-    a = 5
-    b = 3
-    
-    # Act
-    result = add_numbers(a, b)
-    
-    # Assert
-    assert result == 8
-```
-
 ## Test Structure and Best Practices
 
 ### 1. Test Class Organization
@@ -217,28 +195,7 @@ def test_square_function(input_value, expected):
     assert result == expected
 ```
 
-### 3. Mocking
-
-Mock external dependencies to isolate the unit being tested:
-
-```python
-from unittest.mock import patch, MagicMock
-
-def test_send_email_with_mock():
-    """Test email sending without actually sending emails."""
-    with patch('email_service.send_email') as mock_send:
-        # Configure the mock
-        mock_send.return_value = True
-        
-        # Test the function
-        result = notify_user("user@example.com", "Hello")
-        
-        # Verify the mock was called correctly
-        mock_send.assert_called_once_with("user@example.com", "Hello")
-        assert result is True
-```
-
-### 4. Testing Exceptions
+### 3. Testing Exceptions
 
 Test that functions raise appropriate exceptions:
 
@@ -384,48 +341,13 @@ def test_save_to_file():
             os.unlink(filename)
 ```
 
-### 3. Testing API Functions
-
-```python
-from unittest.mock import patch, Mock
-
-def test_api_call_success():
-    """Test successful API call."""
-    with patch('requests.get') as mock_get:
-        # Mock successful response
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"data": "success"}
-        mock_get.return_value = mock_response
-        
-        # Test the function
-        result = call_api("https://api.example.com/data")
-        
-        # Verify results
-        assert result == {"data": "success"}
-        mock_get.assert_called_once_with("https://api.example.com/data")
-
-def test_api_call_failure():
-    """Test API call failure."""
-    with patch('requests.get') as mock_get:
-        # Mock failed response
-        mock_response = Mock()
-        mock_response.status_code = 404
-        mock_get.return_value = mock_response
-        
-        # Test that exception is raised
-        with pytest.raises(APIError):
-            call_api("https://api.example.com/data")
-```
-
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Import Errors**: Make sure your test files can import the modules they're testing
 2. **Test Isolation**: Ensure tests don't depend on each other
-3. **Mock Configuration**: Verify mocks are set up correctly
-4. **File Paths**: Use absolute paths or proper relative paths for file operations
+3. **File Paths**: Use absolute paths or proper relative paths for file operations
 
 ### Debugging Tests
 
@@ -446,7 +368,6 @@ python -m pytest -vvv
 - [ ] Tests are independent and can run in any order
 - [ ] Tests use the Arrange-Act-Assert pattern
 - [ ] Edge cases and error conditions are tested
-- [ ] External dependencies are mocked
 - [ ] Test coverage is above 80%
 - [ ] Tests run quickly (under 1 second total)
 - [ ] Tests are well-documented with docstrings

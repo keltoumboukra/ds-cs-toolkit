@@ -28,8 +28,7 @@ python -m pytest --cov=. --cov-report=term-missing
 ds-cs-toolkit/
 ├── tests/                          # Test directory
 │   ├── __init__.py                 # Makes tests a Python package
-│   ├── test_data_generation.py     # Tests for data generation module
-│   └── test_examples.py            # Example tests for learning
+│   └── test_data_generation.py     # Tests for data generation module
 ├── docs/
 │   └── testing_guide.md            # Comprehensive testing guide
 ├── pytest.ini                      # Pytest configuration
@@ -51,7 +50,6 @@ ds-cs-toolkit/
 
 ### 3. Test Files
 - **test_data_generation.py**: Comprehensive tests for the data generation module (100% coverage)
-- **test_examples.py**: Learning examples covering various testing patterns
 
 ### 4. Documentation
 - **docs/testing_guide.md**: Complete guide to unit testing concepts and best practices
@@ -127,24 +125,17 @@ The data generation module has comprehensive test coverage including:
 
 ## Learning Path
 
-### 1. Start with Examples
-Begin by reading and running the example tests:
-
-```bash
-python -m pytest tests/test_examples.py -v
-```
-
-### 2. Study the Testing Guide
+### 1. Study the Testing Guide
 Read `docs/testing_guide.md` for comprehensive explanations of:
 - Unit testing concepts
 - Best practices
 - Advanced techniques
 - Common patterns
 
-### 3. Practice with Your Code
-Write tests for your own functions following the patterns shown in the examples.
+### 2. Practice with Your Code
+Write tests for your own functions following the patterns shown in the existing tests.
 
-### 4. Understand Coverage
+### 3. Understand Coverage
 Use coverage reports to identify untested code:
 
 ```bash
@@ -170,10 +161,9 @@ Then open `htmlcov/index.html` in your browser to see detailed coverage.
 - Edge case testing
 - Error condition testing
 
-### 4. Mocking
-- External dependencies are mocked
-- File operations use temporary files
-- Database calls are simulated
+### 4. File Operations
+- File operations use temporary files for testing
+- Proper cleanup after tests
 
 ## Adding New Tests
 
@@ -232,7 +222,7 @@ The testing setup is ready for CI/CD integration. You can add these commands to 
 
 1. **Import Errors**: Make sure your test files can import the modules they're testing
 2. **Test Isolation**: Ensure tests don't depend on each other
-3. **Mock Configuration**: Verify mocks are set up correctly
+3. **File Paths**: Use absolute paths or proper relative paths for file operations
 
 ### Debugging
 
@@ -249,11 +239,10 @@ python -m pytest -vvv
 
 ## Next Steps
 
-1. **Explore the Examples**: Run and study `test_examples.py`
-2. **Read the Guide**: Go through `docs/testing_guide.md`
-3. **Write Your Own Tests**: Start testing your own functions
-4. **Improve Coverage**: Aim for 80%+ coverage on new code
-5. **Automate**: Set up CI/CD to run tests automatically
+1. **Read the Guide**: Go through `docs/testing_guide.md`
+2. **Write Your Own Tests**: Start testing your own functions
+3. **Improve Coverage**: Aim for 80%+ coverage on new code
+4. **Automate**: Set up CI/CD to run tests automatically
 
 ## Resources
 
