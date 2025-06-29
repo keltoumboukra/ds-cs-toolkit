@@ -10,12 +10,17 @@ try:
     raw_data = pd.read_csv(
         csv_file_path,
         parse_dates=["order_date"],
-        dayfirst=True,
+        dayfirst=False,  # Changed from True to False
         low_memory=False  # Suppress dtype warning
     )
-    if "revenue" not in raw_data.columns:
+    # Check if 'total' column exists and rename to 'revenue' if needed
+    if "total" in raw_data.columns:
+        raw_data["revenue"] = raw_data["total"]
+    elif "revenue" not in raw_data.columns:
         raw_data["revenue"] = raw_data["quantity"] * raw_data["price"]
     print(f"Data loaded successfully: {raw_data.shape[0]} rows")
+    print(f"Columns: {raw_data.columns.tolist()}")
+    print(f"Date range: {raw_data['order_date'].min()} to {raw_data['order_date'].max()}")
 except Exception as e:
     print(f"Error loading CSV: {e}")
     raw_data = pd.DataFrame()
@@ -39,49 +44,80 @@ category_data = pd.DataFrame(columns=["categories", "revenue"])
 top_products_data = pd.DataFrame(columns=["product_names", "revenue"])
 
 def apply_changes(state):
-    filtered_data = raw_data[
-        (raw_data["order_date"] >= pd.to_datetime(state.start_date)) &
-        (raw_data["order_date"] <= pd.to_datetime(state.end_date))
-    ]
-    if state.selected_category != "All Categories":
-        filtered_data = filtered_data[filtered_data["categories"] == state.selected_category]
+    try:
+        filtered_data = raw_data[
+            (raw_data["order_date"] >= pd.to_datetime(state.start_date)) &
+            (raw_data["order_date"] <= pd.to_datetime(state.end_date))
+        ]
+        if state.selected_category != "All Categories":
+            filtered_data = filtered_data[filtered_data["categories"] == state.selected_category]
 
-    state.revenue_data = filtered_data.groupby("order_date")["revenue"].sum().reset_index()
-    state.revenue_data.columns = ["order_date", "revenue"]
-    print("Revenue Data:")
-    print(state.revenue_data.head())
+        # Ensure we have data to work with
+        if filtered_data.empty:
+            print("No data found for the selected filters")
+            state.revenue_data = pd.DataFrame(columns=["order_date", "revenue"])
+            state.category_data = pd.DataFrame(columns=["categories", "revenue"])
+            state.top_products_data = pd.DataFrame(columns=["product_names", "revenue"])
+            state.raw_data = filtered_data
+            state.total_revenue = "$0.00"
+            state.total_orders = 0
+            state.avg_order_value = "$0.00"
+            state.top_category = "N/A"
+            return
 
-    state.category_data = filtered_data.groupby("categories")["revenue"].sum().reset_index()
-    state.category_data.columns = ["categories", "revenue"]
-    print("Category Data:")
-    print(state.category_data.head())
+        # Create revenue data for line chart
+        revenue_by_date = filtered_data.groupby("order_date")["revenue"].sum().reset_index()
+        state.revenue_data = revenue_by_date.sort_values("order_date")
+        print("Revenue Data:")
+        print(state.revenue_data.head())
 
-    state.top_products_data = (
-        filtered_data.groupby("product_names")["revenue"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
-    state.top_products_data.columns = ["product_names", "revenue"]
-    print("Top Products Data:")
-    print(state.top_products_data.head())
+        # Create category data for bar chart
+        category_revenue = filtered_data.groupby("categories")["revenue"].sum().reset_index()
+        state.category_data = category_revenue.sort_values("revenue", ascending=False)
+        print("Category Data:")
+        print(state.category_data.head())
 
-    state.raw_data = filtered_data
-    state.total_revenue = f"${filtered_data['revenue'].sum():,.2f}"
-    state.total_orders = filtered_data["order_id"].nunique()
-    state.avg_order_value = f"${filtered_data['revenue'].sum() / max(filtered_data['order_id'].nunique(), 1):,.2f}"
-    state.top_category = (
-        filtered_data.groupby("categories")["revenue"].sum().idxmax()
-        if not filtered_data.empty else "N/A"
-    )
+        # Create top products data
+        top_products = (
+            filtered_data.groupby("product_names")["revenue"]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .reset_index()
+        )
+        state.top_products_data = top_products
+        print("Top Products Data:")
+        print(state.top_products_data.head())
+
+        # Update metrics
+        state.raw_data = filtered_data
+        state.total_revenue = f"${filtered_data['revenue'].sum():,.2f}"
+        state.total_orders = filtered_data["order_id"].nunique()
+        state.avg_order_value = f"${filtered_data['revenue'].sum() / max(filtered_data['order_id'].nunique(), 1):,.2f}"
+        state.top_category = (
+            filtered_data.groupby("categories")["revenue"].sum().idxmax()
+            if not filtered_data.empty else "N/A"
+        )
+        
+        print(f"Updated metrics - Revenue: {state.total_revenue}, Orders: {state.total_orders}")
+        
+    except Exception as e:
+        print(f"Error in apply_changes: {e}")
+        import traceback
+        traceback.print_exc()
 
 def on_change(state, var_name, var_value):
-    if var_name in {"start_date", "end_date", "selected_category", "selected_tab"}:
-        print(f"State change detected: {var_name} = {var_value}")  # Debugging
+    """Handle state changes from UI controls"""
+    print(f"State change detected: {var_name} = {var_value}")
+    
+    # Only apply changes for filter-related variables
+    if var_name in ["start_date", "end_date", "selected_category"]:
         apply_changes(state)
+    # For selected_tab, we don't need to recalculate data, just update the display
 
 def on_init(state):
+    """Initialize the app when it first loads"""
+    print("Initializing app...")
     apply_changes(state)
 
 def get_partial_visibility(tab_name, selected_tab):
