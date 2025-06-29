@@ -21,7 +21,7 @@ python -m pytest tests/ -v
 
 ### 4. Run Tests with Coverage
 ```bash
-python -m pytest tests/ --cov=data_generation --cov-report=term-missing
+python -m pytest tests/ --cov=. --cov-report=term-missing
 ```
 
 ## Important: Use the Correct Command
@@ -38,8 +38,8 @@ python -m pytest
 
 ## Test Results
 
-- **29 tests** for the data generation module
-- **100% coverage** for `data_generation.py`
+- **58 tests** for data generation and business logic modules
+- **97% overall coverage** across all testable code
 - All tests should pass in under 1 second
 
 ## Other Useful Commands
@@ -52,7 +52,7 @@ python -m pytest tests/test_data_generation.py -v
 python -m pytest tests/test_data_generation.py::TestGetProductData::test_returns_expected_structure -v
 
 # Generate HTML coverage report
-python -m pytest tests/ --cov=data_generation --cov-report=html
+python -m pytest tests/ --cov=. --cov-report=html
 ```
 
 ## Troubleshooting
@@ -69,9 +69,19 @@ If tests are slow or have conflicts, make sure you're using `tests/` in the comm
 ```
 ds-cs-toolkit/
 ├── tests/
-│   └── test_data_generation.py     # Your tests
-├── data_generation.py              # Code being tested
+│   ├── test_data_generation.py     # Tests for data generation (29 tests)
+│   └── test_taipy_logic.py         # Tests for business logic (29 tests)
+├── data_generation.py              # Data generation module (100% coverage)
+├── taipy_logic.py                  # Business logic module (96% coverage)
 ├── pytest.ini                      # Pytest config
 ├── .coveragerc                     # Coverage config
 └── requirements.txt                # Dependencies
 ```
+
+## Coverage Summary
+
+- **`data_generation.py`**: 100% coverage (29 tests)
+- **`taipy_logic.py`**: 96% coverage (29 tests)
+- **Overall**: 97% coverage (58 tests total)
+
+That's it! Your tests should run successfully with these instructions.
