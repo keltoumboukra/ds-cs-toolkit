@@ -19,7 +19,7 @@ import tempfile
 import os
 
 # Import the functions we want to test
-from data_generation import (
+from taipy_implementation.data_generation import (
     get_product_data,
     generate_order_data,
     create_dataframe,
@@ -342,9 +342,9 @@ class TestSaveToCsv:
 class TestGenerate:
     """Test cases for the main generate function."""
     
-    @patch('data_generation.save_to_csv')
-    @patch('data_generation.create_dataframe')
-    @patch('data_generation.generate_order_data')
+    @patch('taipy_implementation.data_generation.save_to_csv')
+    @patch('taipy_implementation.data_generation.create_dataframe')
+    @patch('taipy_implementation.data_generation.generate_order_data')
     def test_generate_calls_functions_in_order(self, mock_generate_data, mock_create_df, mock_save):
         """Test that generate calls the helper functions in the correct order."""
         # Arrange
