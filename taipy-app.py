@@ -1,4 +1,5 @@
 from taipy.gui import Gui
+import taipy.gui.builder as tgb
 import pandas as pd
 import datetime
 
@@ -82,8 +83,85 @@ def on_change(state, var_name, var_value):
 def on_init(state):
     apply_changes(state)
 
-import taipy.gui.builder as tgb
-
 def get_partial_visibility(tab_name, selected_tab):
     return "block" if tab_name == selected_tab else "none"
+
+with tgb.Page() as page:
+    tgb.text("# Sales Performance Dashboard", mode="md")
+    
+    # Filters section
+    with tgb.part(class_name="card"):
+        with tgb.layout(columns="1 1 2"):  # Arrange elements in 3 columns
+            with tgb.part():
+                tgb.text("Filter From:")
+                tgb.date("{start_date}")
+            with tgb.part():
+                tgb.text("To:")
+                tgb.date("{end_date}")
+            with tgb.part():
+                tgb.text("Filter by Category:")
+                tgb.selector(
+                    value="{selected_category}",
+                    lov=categories,
+                    dropdown=True,
+                    width="300px"
+                )
+   
+    # Metrics section
+    tgb.text("## Key Metrics", mode="md")
+    with tgb.layout(columns="1 1 1 1"):
+        with tgb.part(class_name="metric-card"):
+            tgb.text("### Total Revenue", mode="md")
+            tgb.text("{total_revenue}")
+        with tgb.part(class_name="metric-card"):
+            tgb.text("### Total Orders", mode="md")
+            tgb.text("{total_orders}")
+        with tgb.part(class_name="metric-card"):
+            tgb.text("### Average Order Value", mode="md")
+            tgb.text("{avg_order_value}")
+        with tgb.part(class_name="metric-card"):
+            tgb.text("### Top Category", mode="md")
+            tgb.text("{top_category}")
+
+    tgb.text("## Visualizations", mode="md")
+    # Selector for visualizations with reduced width
+    with tgb.part(style="width: 50%;"):  # Reduce width of the dropdown
+        tgb.selector(
+            value="{selected_tab}",
+            lov=["Revenue Over Time", "Revenue by Category", "Top Products"],
+            dropdown=True,
+            width="360px",  # Reduce width of the dropdown
+        )
+
+    # Conditional rendering of charts based on selected_tab
+    with tgb.part(render="{selected_tab == 'Revenue Over Time'}"):
+        tgb.chart(
+            data="{revenue_data}",
+            x="order_date",
+            y="revenue",
+            type="line",
+            title="Revenue Over Time",
+        )
+
+    with tgb.part(render="{selected_tab == 'Revenue by Category'}"):
+        tgb.chart(
+            data="{category_data}",
+            x="categories",
+            y="revenue",
+            type="bar",
+            title="Revenue by Category",
+        )
+
+    with tgb.part(render="{selected_tab == 'Top Products'}"):
+        tgb.chart(
+            data="{top_products_data}",
+            x="product_names",
+            y="revenue",
+            type="bar",
+            title="Top Products",
+        )
+
+    # Raw Data Table
+    tgb.text("## Raw Data", mode="md")
+    tgb.table(data="{raw_data}")
 
