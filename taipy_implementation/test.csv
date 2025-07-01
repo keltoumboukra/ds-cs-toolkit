@@ -1,0 +1,11 @@
+order_id,order_date,customer_id,customer_name,product_id,product_names,categories,quantity,price,total
+0,2022-12-19,972,Customer_4379,205,Printer,Electronics,1,29.5,29.5
+1,2023-07-15,370,Customer_1926,201,Smartphone,Electronics,10,99.02,990.1999999999999
+2,2011-06-11,701,Customer_6128,204,Monitor,Electronics,3,3.15,9.45
+3,2010-01-14,773,Customer_2342,206,Paper,Stationery,2,26.19,52.38
+4,2013-06-14,716,Customer_2995,208,Notebook,Stationery,8,53.33,426.64
+5,2018-03-22,750,Customer_3950,204,Monitor,Electronics,7,14.16,99.12
+6,2010-04-20,938,Customer_29751,206,Paper,Stationery,3,92.08,276.24
+7,2019-12-09,298,Customer_12041,200,Laptop,Electronics,7,64.72,453.03999999999996
+8,2010-03-09,312,Customer_2029,205,Printer,Electronics,2,35.61,71.22
+9,2011-10-24,752,Customer_7706,204,Monitor,Electronics,3,88.54,265.62

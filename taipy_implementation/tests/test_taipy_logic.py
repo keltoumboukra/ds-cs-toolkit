@@ -8,7 +8,7 @@ import os
 # Add the parent directory to the path so we can import taipy_logic
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from taipy_logic import (
+from taipy_implementation.taipy_logic import (
     get_partial_visibility,
     load_and_process_csv_data,
     get_categories_list,
