@@ -1,47 +1,81 @@
-// This component is responsible for disovering new containers within the docker environment
-discovery.docker "getting_started" {
-	host = "unix:///var/run/docker.sock"
-	refresh_interval = "5s"
+// Collect Mac system logs
+loki.source.file "system_logs" {
+  path = [
+    "/var/log/system.log",
+    "/var/log/secure.log",
+    "/var/log/asl/*.asl",
+    "/var/log/DiagnosticReports/*.crash",
+    "/var/log/DiagnosticReports/*.spin",
+    "/var/log/DiagnosticReports/*.hang"
+  ]
+  follow = true
+  forward_to = [loki.process.system_logs.receiver]
 }
 
-// This component is responsible for relabeling the discovered containers
-discovery.relabel "getting_started" {
-	targets = []
-
-	rule {
-		source_labels = ["__meta_docker_container_name"]
-		regex         = "/(.*)"
-		target_label  = "container"
-	}
+// Collect application logs
+loki.source.file "application_logs" {
+  path = [
+    "/var/log/install.log",
+    "/var/log/commerce.log",
+    "/var/log/fsck_hfs.log",
+    "/var/log/fsck_apfs.log"
+  ]
+  follow = true
+  forward_to = [loki.process.application_logs.receiver]
 }
 
-// This component is responsible for collecting logs from the discovered containers
-loki.source.docker "getting_started" {
-	host             = "unix:///var/run/docker.sock"
-	targets          = discovery.docker.getting_started.targets
-	forward_to       = [loki.process.getting_started.receiver]
-	relabel_rules    = discovery.relabel.getting_started.rules
-	refresh_interval = "5s"
+// Collect user-specific logs
+loki.source.file "user_logs" {
+  path = [
+    "/Users/*/Library/Logs/*.log",
+    "/Users/*/Library/Logs/DiagnosticReports/*.crash",
+    "/Users/*/Library/Logs/DiagnosticReports/*.spin"
+  ]
+  follow = true
+  forward_to = [loki.process.user_logs.receiver]
 }
 
-// This component is responsible for processing the logs (In this case adding static labels)
-loki.process "getting_started" {
-    stage.static_labels {
+// Process system logs
+loki.process "system_logs" {
+  stage.static_labels {
     values = {
-      env = "production",
+      source = "system",
+      platform = "macos"
     }
-}
-    forward_to = [loki.write.getting_started.receiver]
-}
-
-// This component is responsible for writing the logs to Loki
-loki.write "getting_started" {
-	endpoint {
-		url  = "http://loki:3100/loki/api/v1/push"
-	}
+  }
+  forward_to = [loki.write.mac_logs.receiver]
 }
 
-// Enables the ability to view logs in the Alloy UI in realtime
+// Process application logs
+loki.process "application_logs" {
+  stage.static_labels {
+    values = {
+      source = "application",
+      platform = "macos"
+    }
+  }
+  forward_to = [loki.write.mac_logs.receiver]
+}
+
+// Process user logs
+loki.process "user_logs" {
+  stage.static_labels {
+    values = {
+      source = "user",
+      platform = "macos"
+    }
+  }
+  forward_to = [loki.write.mac_logs.receiver]
+}
+
+// Send everything to Loki
+loki.write "mac_logs" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// Enable live debugging in Alloy UI
 livedebugging {
   enabled = true
 }
