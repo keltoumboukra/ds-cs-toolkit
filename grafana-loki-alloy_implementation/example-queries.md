@@ -1,172 +1,182 @@
-# Example LogQL Queries for Live Log Collection
+# Example LogQL Queries for Weather API Logs
 
-Use these queries in Grafana Explore (http://localhost:3000) to get started with your live log collection.
+Use these queries in Grafana Explore (http://localhost:3000) to analyze your weather API logs.
 
 ## Basic Queries
 
+### View all weather logs
+```logql
+{source="weather-api"}
+```
+
+### View logs from weather app container
+```logql
+{container="grafana-loki-alloy_implementation-weather-app-1"}
+```
+
 ### View all application logs
 ```logql
-{source="application"}
+{app="weather-service"}
 ```
 
-### View logs from specific container
+## API Request Queries
+
+### Find API requests
 ```logql
-{container="grafana-loki-alloy_implementation-log-generator-1"}
+{source="weather-api"} |= "Fetching weather data"
 ```
 
-### View all logs
+### Find successful API responses
 ```logql
-{platform="docker"}
+{source="weather-api"} |= "Weather data received"
 ```
 
-## Error and Warning Queries
-
-### Find error messages
+### Find API errors
 ```logql
-{source="application"} |= "error"
+{source="weather-api"} |= "API error"
 ```
 
-### Find warning messages
-```logql
-{source="application"} |= "warning"
-```
+## City-Specific Queries
 
-### Find failed operations
+### Find logs for specific cities
 ```logql
-{source="application"} |= "failed"
-```
-
-## User Activity Queries
-
-### Find user login events
-```logql
-{source="application"} |= "login"
-```
-
-### Find user logout events
-```logql
-{source="application"} |= "logout"
-```
-
-### Find specific user actions
-```logql
-{source="application"} |= "alice"
+{source="weather-api"} |= "London"
 ```
 ```logql
-{source="application"} |= "bob"
-```
-
-## Resource Operation Queries
-
-### Find file operations
-```logql
-{source="application"} |= "file"
-```
-
-### Find database operations
-```logql
-{source="application"} |= "database"
-```
-
-### Find document operations
-```logql
-{source="application"} |= "document"
-```
-
-### Find media operations
-```logql
-{source="application"} |= "image"
+{source="weather-api"} |= "Tokyo"
 ```
 ```logql
-{source="application"} |= "video"
+{source="weather-api"} |= "New York"
 ```
 
-## Action-Specific Queries
-
-### Find search operations
+### Find temperature data for cities
 ```logql
-{source="application"} |= "search"
+{source="weather-api"} |= "°C"
 ```
 
-### Find download operations
+### Find humidity data
 ```logql
-{source="application"} |= "download"
+{source="weather-api"} |= "% humidity"
 ```
 
-### Find upload operations
+## Temperature Alert Queries
+
+### Find high temperature alerts
 ```logql
-{source="application"} |= "upload"
+{source="weather-api"} |= "High temperature alert"
 ```
 
-### Find delete operations
+### Find low temperature alerts
 ```logql
-{source="application"} |= "delete"
+{source="weather-api"} |= "Low temperature alert"
 ```
 
-### Find create operations
+### Find all temperature alerts
 ```logql
-{source="application"} |= "create"
+{source="weather-api"} |= "temperature alert"
 ```
 
-## Error Type Queries
+## Humidity Alert Queries
+
+### Find high humidity alerts
+```logql
+{source="weather-api"} |= "High humidity alert"
+```
+
+### Find humidity data
+```logql
+{source="weather-api"} |= "humidity"
+```
+
+## Error Queries
 
 ### Find timeout errors
 ```logql
-{source="application"} |= "timeout"
+{source="weather-api"} |= "Timeout error"
 ```
 
-### Find permission errors
+### Find connection errors
 ```logql
-{source="application"} |= "permission denied"
+{source="weather-api"} |= "Connection error"
 ```
 
-### Find server errors
+### Find all error logs
 ```logql
-{source="application"} |= "server error"
+{source="weather-api"} |= "error"
 ```
 
-### Find network errors
+## Weather Description Queries
+
+### Find weather descriptions
 ```logql
-{source="application"} |= "network error"
+{source="weather-api"} |= "cloudy"
+```
+```logql
+{source="weather-api"} |= "rain"
+```
+```logql
+{source="weather-api"} |= "sunny"
 ```
 
 ## Advanced Queries
 
 ### Combine multiple conditions
 ```logql
-{source="application"} |= "error" |= "timeout"
+{source="weather-api"} |= "error" |= "London"
 ```
 
 ### Exclude certain terms
 ```logql
-{source="application"} != "info" != "debug"
+{source="weather-api"} != "info" != "debug"
 ```
 
 ### Time-based filtering (last hour)
 ```logql
-{source="application"} |= "error" [1h]
+{source="weather-api"} |= "error" [1h]
 ```
 
-### Count log entries by type
+### Count API requests by city
 ```logql
-sum by (level) (count_over_time({source="application"}[5m]))
+sum by (city) (count_over_time({source="weather-api"} |= "Fetching weather data" [5m]))
 ```
 
 ### Count errors over time
 ```logql
-sum(count_over_time({source="application"} |= "error" [5m]))
+sum(count_over_time({source="weather-api"} |= "error" [5m]))
+```
+
+### Count temperature alerts
+```logql
+sum(count_over_time({source="weather-api"} |= "temperature alert" [5m]))
 ```
 
 ## Performance Queries
 
-### Find performance warnings
+### Find slow API responses
 ```logql
-{source="application"} |= "took longer than expected"
+{source="weather-api"} |= "timeout"
 ```
 
-### Find timeout warnings
+### Find connection issues
 ```logql
-{source="application"} |= "timeout"
+{source="weather-api"} |= "connection"
+```
+
+## Real-time Monitoring
+
+### Monitor API requests in real-time
+```logql
+{source="weather-api"} |= "Fetching weather data" [5m]
+```
+
+### Monitor errors in real-time
+```logql
+{source="weather-api"} |= "error" [5m]
+```
+
+### Monitor temperature alerts
+```logql
+{source="weather-api"} |= "temperature alert" [5m]
 ```
 
 ## Tips
@@ -177,5 +187,7 @@ sum(count_over_time({source="application"} |= "error" [5m]))
 4. Add time ranges like `[5m]`, `[1h]`, `[24h]` to limit results
 5. Use `count_over_time()` for aggregations
 6. Use `sum by (label)` to group results by labels
-7. The log generator creates logs every 1-5 seconds, so you should see continuous data
-8. You can manually generate logs by visiting `http://localhost:5000/generate_log` 
+7. The weather service fetches data every 10-30 seconds for random cities
+8. You can manually trigger weather requests by visiting `http://localhost:5001/weather`
+9. Temperature alerts are generated when temp > 30°C or < 0°C
+10. Humidity alerts are generated when humidity > 80% 

@@ -53,7 +53,7 @@ services:
          /run.sh
     networks:
       - loki
-  log-generator:
+  weather-app:
     build: .
     ports:
       - "5001:5000"

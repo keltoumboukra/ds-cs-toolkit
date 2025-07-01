@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🛑 Stopping Mac Log Collection Stack..."
+echo "🛑 Stopping Weather API Log Collection Stack..."
 echo ""
 
 # Stop the services

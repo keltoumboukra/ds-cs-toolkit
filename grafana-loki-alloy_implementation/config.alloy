@@ -1,42 +1,44 @@
 // Discover Docker containers
-discovery.docker "app_containers" {
+discovery.docker "weather_containers" {
   host = "unix:///var/run/docker.sock"
   refresh_interval = "5s"
 }
 
 // Relabel discovered Docker containers
-discovery.relabel "app_containers" {
-  targets = discovery.docker.app_containers.targets
+discovery.relabel "weather_containers" {
+  targets = discovery.docker.weather_containers.targets
 
-  rule = [{
+  rule {
     source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*)"
-    target_label  = "container"
-  }]
+    regex = "/(.*)"
+    target_label = "container"
+    action = "replace"
+  }
 }
 
 // Collect logs from Docker containers
-loki.source.docker "app_logs" {
-  host             = "unix:///var/run/docker.sock"
-  targets          = discovery.docker.app_containers.targets
-  forward_to       = [loki.process.app_logs.receiver]
-  relabel_rules    = discovery.relabel.app_containers.rules
+loki.source.docker "weather_logs" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.weather_containers.output
+  forward_to = [loki.process.weather_logs.receiver]
   refresh_interval = "5s"
 }
 
-// Process application logs
-loki.process "app_logs" {
-  stage.static_labels {
+// Process weather application logs
+loki.process "weather_logs" {
+  forward_to = [loki.write.weather_logs.receiver]
+
+  stage.labels {
     values = {
-      source = "application"
-      platform = "docker"
+      source = "weather-api",
+      platform = "docker",
+      app = "weather-service",
     }
   }
-  forward_to = [loki.write.app_logs.receiver]
 }
 
 // Send everything to Loki
-loki.write "app_logs" {
+loki.write "weather_logs" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }

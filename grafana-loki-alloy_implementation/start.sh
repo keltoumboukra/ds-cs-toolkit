@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🚀 Starting Mac Log Collection Stack..."
-echo "This will start Grafana Loki, Grafana, and Alloy to collect your Mac logs"
+echo "🌤️  Starting Weather API Log Collection Stack..."
+echo "This will start Grafana Loki, Grafana, Alloy, and the Weather API service"
 echo ""
 
 # Check if Docker is running
@@ -16,7 +16,7 @@ docker compose up -d
 
 # Wait a moment for services to start
 echo "⏳ Waiting for services to start..."
-sleep 10
+sleep 15
 
 # Check if services are running
 echo "🔍 Checking service status..."
@@ -24,16 +24,21 @@ if docker compose ps | grep -q "Up"; then
     echo ""
     echo "✅ Services are running!"
     echo ""
-    echo "🌐 Access your logs at:"
+    echo "🌐 Access your weather logs at:"
     echo "   Grafana:     http://localhost:3000"
     echo "   Alloy UI:    http://localhost:12345/graph"
+    echo "   Weather API: http://localhost:5001"
     echo "   Loki API:    http://localhost:3100"
     echo ""
-    echo "📊 To view logs:"
+    echo "📊 To view weather logs:"
     echo "   1. Open http://localhost:3000"
     echo "   2. Click 'Explore'"
     echo "   3. Select 'Loki' data source"
-    echo "   4. Try queries like: {source=\"system\"} or {platform=\"macos\"}"
+    echo "   4. Try queries like: {source=\"weather-api\"}"
+    echo ""
+    echo "🌍 Test the weather API:"
+    echo "   - Random city: http://localhost:5001/weather"
+    echo "   - Specific city: http://localhost:5001/weather/London"
     echo ""
     echo "🛑 To stop services: docker compose down"
 else
