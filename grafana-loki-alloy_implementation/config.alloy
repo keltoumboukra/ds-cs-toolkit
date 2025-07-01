@@ -1,75 +1,42 @@
-// Collect Mac system logs
-loki.source.file "system_logs" {
-  path = [
-    "/var/log/system.log",
-    "/var/log/secure.log",
-    "/var/log/asl/*.asl",
-    "/var/log/DiagnosticReports/*.crash",
-    "/var/log/DiagnosticReports/*.spin",
-    "/var/log/DiagnosticReports/*.hang"
-  ]
-  follow = true
-  forward_to = [loki.process.system_logs.receiver]
+// Discover Docker containers
+discovery.docker "app_containers" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
 }
 
-// Collect application logs
-loki.source.file "application_logs" {
-  path = [
-    "/var/log/install.log",
-    "/var/log/commerce.log",
-    "/var/log/fsck_hfs.log",
-    "/var/log/fsck_apfs.log"
-  ]
-  follow = true
-  forward_to = [loki.process.application_logs.receiver]
+// Relabel discovered Docker containers
+discovery.relabel "app_containers" {
+  targets = discovery.docker.app_containers.targets
+
+  rule = [{
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }]
 }
 
-// Collect user-specific logs
-loki.source.file "user_logs" {
-  path = [
-    "/Users/*/Library/Logs/*.log",
-    "/Users/*/Library/Logs/DiagnosticReports/*.crash",
-    "/Users/*/Library/Logs/DiagnosticReports/*.spin"
-  ]
-  follow = true
-  forward_to = [loki.process.user_logs.receiver]
-}
-
-// Process system logs
-loki.process "system_logs" {
-  stage.static_labels {
-    values = {
-      source = "system",
-      platform = "macos"
-    }
-  }
-  forward_to = [loki.write.mac_logs.receiver]
+// Collect logs from Docker containers
+loki.source.docker "app_logs" {
+  host             = "unix:///var/run/docker.sock"
+  targets          = discovery.docker.app_containers.targets
+  forward_to       = [loki.process.app_logs.receiver]
+  relabel_rules    = discovery.relabel.app_containers.rules
+  refresh_interval = "5s"
 }
 
 // Process application logs
-loki.process "application_logs" {
+loki.process "app_logs" {
   stage.static_labels {
     values = {
-      source = "application",
-      platform = "macos"
+      source = "application"
+      platform = "docker"
     }
   }
-  forward_to = [loki.write.mac_logs.receiver]
-}
-
-// Process user logs
-loki.process "user_logs" {
-  stage.static_labels {
-    values = {
-      source = "user",
-      platform = "macos"
-    }
-  }
-  forward_to = [loki.write.mac_logs.receiver]
+  forward_to = [loki.write.app_logs.receiver]
 }
 
 // Send everything to Loki
-loki.write "mac_logs" {
+loki.write "app_logs" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }

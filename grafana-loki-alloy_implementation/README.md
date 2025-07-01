@@ -1,93 +1,105 @@
-# Mac Log Collection with Grafana Loki and Alloy
+# Live Log Collection with Grafana Loki and Alloy
 
-This repository provides a setup for collecting and visualizing real logs from your Mac laptop using Grafana Loki and Grafana Alloy.
+This repository provides a setup for collecting and visualizing live logs using Grafana Loki and Grafana Alloy, with a Python application that generates realistic log data in real-time.
 
 ![Loki Stack](https://grafana.com/media/docs/loki/getting-started-loki-stack-3.png)
 
 ## Overview
 
-This setup collects logs from:
-- **System logs**: `/var/log/system.log`, `/var/log/secure.log`, diagnostic reports
-- **Application logs**: Installation logs, filesystem logs, commerce logs
-- **User logs**: User-specific logs from `~/Library/Logs/`
+This setup includes:
+- **Log Generator**: A Python Flask application that generates realistic logs continuously
+- **Grafana Alloy**: Collects logs from Docker containers
+- **Grafana Loki**: Stores and indexes the logs
+- **Grafana**: Visualizes and queries the logs
 
 ## Prerequisites
 Ensure you have the following installed on your system:
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-## Running the Mac Log Collection Stack
+## Running the Log Collection Stack
 
 1. Navigate to the project directory:
    ```sh
    cd grafana-loki-alloy_implementation
    ```
 
-2. Start Loki, Grafana, and Alloy using Docker Compose:
+2. Start all services using Docker Compose:
    ```sh
    docker compose up -d
    ```
 
 3. Verify the components are running:
+   - **Log Generator:** [http://localhost:5001](http://localhost:5001)
    - **Grafana:** [http://localhost:3000](http://localhost:3000)
    - **Loki:** [http://localhost:3100/metrics](http://localhost:3100/metrics)
    - **Alloy:** [http://localhost:12345/graph](http://localhost:12345/graph)
 
-## Querying Mac Logs
+## Log Generator Application
 
-You can query your Mac logs using Grafana's **Explore** feature at [http://localhost:3000](http://localhost:3000):
+The log generator creates realistic log entries including:
+- **Info logs**: User actions (login, logout, search, etc.)
+- **Warning logs**: Performance warnings
+- **Error logs**: Various error scenarios (timeout, permission denied, etc.)
+
+### Manual Log Generation
+
+You can manually generate logs by visiting:
+- `http://localhost:5001/generate_log` - Generate a random log
+- `http://localhost:5001/generate_log?type=error&message=Custom error message` - Generate specific log
+
+## Querying Logs
+
+You can query your logs using Grafana's **Explore** feature at [http://localhost:3000](http://localhost:3000):
 
 1. Open **Explore**.
 2. Select the Loki data source.
 3. Use LogQL queries, for example:
 
-   **View all system logs:**
-   ```logql
-   {source="system"}
-   ```
-
-   **View error logs:**
-   ```logql
-   {source="system"} |= "error"
-   ```
-
-   **View user-specific logs:**
-   ```logql
-   {source="user"}
-   ```
-
-   **View application logs:**
+   **View all logs:**
    ```logql
    {source="application"}
    ```
 
-   **Search for specific terms:**
+   **View error logs:**
    ```logql
-   {platform="macos"} |= "kernel"
+   {source="application"} |= "error"
    ```
 
-## Log Sources
+   **View logs from specific container:**
+   ```logql
+   {container="grafana-loki-alloy_implementation-log-generator-1"}
+   ```
 
-The setup collects logs from these Mac-specific locations:
+   **View warning logs:**
+   ```logql
+   {source="application"} |= "warning"
+   ```
 
-### System Logs (`source="system"`)
-- `/var/log/system.log` - General system messages
-- `/var/log/secure.log` - Security-related messages
-- `/var/log/asl/*.asl` - Apple System Log files
-- `/var/log/DiagnosticReports/*.crash` - Application crash reports
-- `/var/log/DiagnosticReports/*.spin` - Application hang reports
-- `/var/log/DiagnosticReports/*.hang` - System hang reports
+   **Search for specific users:**
+   ```logql
+   {source="application"} |= "alice"
+   ```
 
-### Application Logs (`source="application"`)
-- `/var/log/install.log` - Installation logs
-- `/var/log/commerce.log` - App Store and commerce logs
-- `/var/log/fsck_hfs.log` - HFS filesystem check logs
-- `/var/log/fsck_apfs.log` - APFS filesystem check logs
+## Log Types Generated
 
-### User Logs (`source="user"`)
-- `/Users/*/Library/Logs/*.log` - User application logs
-- `/Users/*/Library/Logs/DiagnosticReports/*.crash` - User app crashes
-- `/Users/*/Library/Logs/DiagnosticReports/*.spin` - User app hangs
+The application generates various types of realistic logs:
+
+### Info Logs
+- User actions: login, logout, search, download, upload, delete, create
+- Resource operations: document, image, video, audio, database, file
+
+### Warning Logs
+- Performance warnings
+- Operation timeouts
+- Resource usage alerts
+
+### Error Logs
+- Timeout errors
+- Permission denied errors
+- Not found errors
+- Server errors
+- Network errors
 
 ## Stopping the Stack
 
@@ -98,7 +110,23 @@ docker compose down
 
 ## Troubleshooting
 
-If you encounter permission issues accessing log files, you may need to grant Docker access to the log directories. The setup uses read-only mounts for security.
+If you encounter issues:
+
+1. **Check container status:**
+   ```sh
+   docker compose ps
+   ```
+
+2. **View logs:**
+   ```sh
+   docker compose logs alloy
+   docker compose logs log-generator
+   ```
+
+3. **Restart services:**
+   ```sh
+   docker compose restart
+   ```
 
 ## Contributing
 

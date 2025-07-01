@@ -1,134 +1,172 @@
-# Example LogQL Queries for Mac Logs
+# Example LogQL Queries for Live Log Collection
 
-Use these queries in Grafana Explore (http://localhost:3000) to get started with your Mac logs.
+Use these queries in Grafana Explore (http://localhost:3000) to get started with your live log collection.
 
 ## Basic Queries
 
-### View all logs by source
-```logql
-{source="system"}
-```
+### View all application logs
 ```logql
 {source="application"}
 ```
+
+### View logs from specific container
 ```logql
-{source="user"}
+{container="grafana-loki-alloy_implementation-log-generator-1"}
 ```
 
-### View all Mac logs
+### View all logs
 ```logql
-{platform="macos"}
+{platform="docker"}
 ```
 
 ## Error and Warning Queries
 
 ### Find error messages
 ```logql
-{platform="macos"} |= "error"
+{source="application"} |= "error"
 ```
 
 ### Find warning messages
 ```logql
-{platform="macos"} |= "warning"
+{source="application"} |= "warning"
 ```
 
 ### Find failed operations
 ```logql
-{platform="macos"} |= "failed"
+{source="application"} |= "failed"
 ```
 
-## System-Specific Queries
+## User Activity Queries
 
-### Kernel messages
+### Find user login events
 ```logql
-{source="system"} |= "kernel"
+{source="application"} |= "login"
 ```
 
-### Security events
+### Find user logout events
 ```logql
-{source="system"} |= "security"
+{source="application"} |= "logout"
 ```
 
-### Authentication events
+### Find specific user actions
 ```logql
-{source="system"} |= "auth"
+{source="application"} |= "alice"
+```
+```logql
+{source="application"} |= "bob"
 ```
 
-## Application-Specific Queries
+## Resource Operation Queries
 
-### Installation logs
+### Find file operations
 ```logql
-{source="application"} |= "install"
+{source="application"} |= "file"
 ```
 
-### Filesystem operations
+### Find database operations
 ```logql
-{source="application"} |= "fsck"
+{source="application"} |= "database"
 ```
 
-### App Store activity
+### Find document operations
 ```logql
-{source="application"} |= "commerce"
+{source="application"} |= "document"
 ```
 
-## User-Specific Queries
-
-### User application crashes
+### Find media operations
 ```logql
-{source="user"} |= "crash"
+{source="application"} |= "image"
+```
+```logql
+{source="application"} |= "video"
 ```
 
-### User application hangs
+## Action-Specific Queries
+
+### Find search operations
 ```logql
-{source="user"} |= "hang"
+{source="application"} |= "search"
+```
+
+### Find download operations
+```logql
+{source="application"} |= "download"
+```
+
+### Find upload operations
+```logql
+{source="application"} |= "upload"
+```
+
+### Find delete operations
+```logql
+{source="application"} |= "delete"
+```
+
+### Find create operations
+```logql
+{source="application"} |= "create"
+```
+
+## Error Type Queries
+
+### Find timeout errors
+```logql
+{source="application"} |= "timeout"
+```
+
+### Find permission errors
+```logql
+{source="application"} |= "permission denied"
+```
+
+### Find server errors
+```logql
+{source="application"} |= "server error"
+```
+
+### Find network errors
+```logql
+{source="application"} |= "network error"
 ```
 
 ## Advanced Queries
 
-### Combine multiple sources
+### Combine multiple conditions
 ```logql
-{source=~"system|application"} |= "error"
-```
-
-### Time-based filtering (last hour)
-```logql
-{platform="macos"} |= "error" [1h]
+{source="application"} |= "error" |= "timeout"
 ```
 
 ### Exclude certain terms
 ```logql
-{platform="macos"} != "debug" != "info"
+{source="application"} != "info" != "debug"
 ```
 
-### Count log entries by source
+### Time-based filtering (last hour)
 ```logql
-sum by (source) (count_over_time({platform="macos"}[5m]))
+{source="application"} |= "error" [1h]
 ```
 
-## Useful Patterns
-
-### Find specific applications
+### Count log entries by type
 ```logql
-{platform="macos"} |= "Safari"
-```
-```logql
-{platform="macos"} |= "Chrome"
+sum by (level) (count_over_time({source="application"}[5m]))
 ```
 
-### Find system startup/shutdown
+### Count errors over time
 ```logql
-{source="system"} |= "shutdown"
-```
-```logql
-{source="system"} |= "startup"
+sum(count_over_time({source="application"} |= "error" [5m]))
 ```
 
-### Find network-related issues
+## Performance Queries
+
+### Find performance warnings
 ```logql
-{platform="macos"} |= "network"
+{source="application"} |= "took longer than expected"
 ```
+
+### Find timeout warnings
 ```logql
-{platform="macos"} |= "wifi"
+{source="application"} |= "timeout"
 ```
 
 ## Tips
@@ -138,4 +176,6 @@ sum by (source) (count_over_time({platform="macos"}[5m]))
 3. Use `!=` to exclude terms
 4. Add time ranges like `[5m]`, `[1h]`, `[24h]` to limit results
 5. Use `count_over_time()` for aggregations
-6. Use `sum by (label)` to group results by labels 
+6. Use `sum by (label)` to group results by labels
+7. The log generator creates logs every 1-5 seconds, so you should see continuous data
+8. You can manually generate logs by visiting `http://localhost:5000/generate_log` 
