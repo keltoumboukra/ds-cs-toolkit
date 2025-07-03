@@ -18,6 +18,16 @@ DSPy-based implementation for natural language processing and AI applications.
 
 [View DSPy Implementation →](dspy_implementation/)
 
+### grafana-loki-alloy_implementation/
+A complete log collection and visualization stack using Grafana, Loki, and Alloy with a real weather API service.
+
+- **Real-time Log Collection**: Weather API logs collected via Alloy
+- **Log Storage & Querying**: Loki for efficient log storage and retrieval
+- **Visualization Dashboard**: Grafana for log analysis and monitoring
+- **Working Example**: Live weather API generating logs with API errors, info messages, and alerts
+
+[View Grafana-Loki-Alloy Implementation →](grafana-loki-alloy_implementation/README.md)
+
 ## Getting Started
 
 Each project in this toolkit is self-contained with its own requirements and documentation. Navigate to the specific project folder to get started:
@@ -31,6 +41,11 @@ python taipy-app.py
 # For DSPy implementation  
 cd dspy_implementation
 # Follow project-specific instructions
+
+# For Grafana-Loki-Alloy stack
+cd grafana-loki-alloy_implementation
+docker compose up -d
+# Access Grafana at http://localhost:3000
 ```
 
 ## Contributing
