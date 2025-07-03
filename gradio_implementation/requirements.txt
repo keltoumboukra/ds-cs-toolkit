@@ -1,3 +1,6 @@
-gradio
-polars
-numpy 
+gradio==4.44.1
+polars==1.31.0
+numpy==2.0.2
+matplotlib==3.9.4
+cachetools==6.1.0
+pandas==2.3.0
