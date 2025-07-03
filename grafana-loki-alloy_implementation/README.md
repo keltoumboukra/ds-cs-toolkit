@@ -2,6 +2,103 @@
 
 A complete setup for collecting and visualizing logs from a real weather API service using Grafana Loki and Grafana Alloy.
 
+## System Architecture & Data Flow
+
+```mermaid
+graph TB
+    %% External APIs
+    subgraph "External Weather APIs"
+        OWM[OpenWeatherMap API]
+        WAPI[WeatherAPI.com]
+    end
+    
+    %% User/Client
+    subgraph "User/Client"
+        USER[User/Client]
+        BROWSER[Browser]
+    end
+    
+    %% Main Application
+    subgraph "Weather API Service"
+        WA[Weather API<br/>Flask App<br/>Port: 5001]
+        WA --> |Fetches weather data| OWM
+        WA --> |Fallback API| WAPI
+    end
+    
+    %% Log Collection Pipeline
+    subgraph "Log Collection Pipeline"
+        ALLOY[Grafana Alloy<br/>Log Collector<br/>Port: 12345]
+        LOKI[Grafana Loki<br/>Log Storage<br/>Port: 3100]
+    end
+    
+    %% Visualization
+    subgraph "Visualization & Monitoring"
+        GRAFANA[Grafana<br/>Dashboard & Queries<br/>Port: 3000]
+    end
+    
+    %% Data Flow
+    USER --> |HTTP Request| WA
+    BROWSER --> |HTTP Request| WA
+    WA --> |Generates logs| ALLOY
+    ALLOY --> |Collects & forwards| LOKI
+    LOKI --> |Stores logs| LOKI
+    GRAFANA --> |Queries logs| LOKI
+    USER --> |View dashboards| GRAFANA
+    
+    %% Styling
+    classDef service fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef user fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef storage fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    
+    class WA,ALLOY,GRAFANA service
+    class OWM,WAPI external
+    class USER,BROWSER user
+    class LOKI storage
+```
+
+### Component Details
+
+| Component | Purpose | Port | Key Features |
+|-----------|---------|------|--------------|
+| **Weather API** | Flask application that fetches real weather data | 5001 | • Fetches from multiple weather APIs<br/>• Generates structured logs<br/>• Handles errors gracefully |
+| **Grafana Alloy** | Log collection agent | 12345 | • Collects logs from Docker containers<br/>• Processes and forwards to Loki<br/>• Provides collection metrics |
+| **Grafana Loki** | Log storage and indexing | 3100 | • Stores logs efficiently<br/>• Provides LogQL query interface<br/>• Scales horizontally |
+| **Grafana** | Visualization and querying | 3000 | • Interactive dashboards<br/>• LogQL query interface<br/>• Real-time log viewing |
+
+### Data Flow Steps
+
+1. **User Request**: User/client makes HTTP request to Weather API
+2. **Weather Fetch**: API fetches weather data from external services
+3. **Log Generation**: API generates structured logs for each operation
+4. **Log Collection**: Alloy collects logs from the API container
+5. **Log Storage**: Loki receives and stores the logs with indexing
+6. **Log Querying**: Grafana queries Loki using LogQL
+7. **Visualization**: Results displayed in Grafana dashboards
+
+### Log Types & Processing
+
+```mermaid
+graph LR
+    subgraph "Log Generation"
+        INFO[Info Logs<br/>API requests, responses]
+        WARN[Warning Logs<br/>Temperature/humidity alerts]
+        ERROR[Error Logs<br/>API failures, timeouts]
+    end
+    
+    subgraph "Log Processing"
+        COLLECT[Alloy Collection]
+        STORE[Loki Storage]
+        QUERY[Grafana Query]
+    end
+    
+    INFO --> COLLECT
+    WARN --> COLLECT
+    ERROR --> COLLECT
+    COLLECT --> STORE
+    STORE --> QUERY
+```
+
 ## Quick Start
 
 ### 1. Start Everything
