@@ -146,6 +146,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+venv-gradio/
+venv_dspy/
 
 # Spyder project settings
 .spyderproject
