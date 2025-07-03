@@ -2,7 +2,7 @@
 
 A complete setup for collecting and visualizing logs from a real weather API service using Grafana Loki and Grafana Alloy.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Start Everything
 ```bash
@@ -14,14 +14,14 @@ docker compose ps
 ```
 
 ### 2. Access Grafana
-- **URL:** http://localhost:3000
-- **No login required** (anonymous access enabled)
+- URL: http://localhost:3000
+- No login required (anonymous access enabled)
 
 ### 3. View Logs in Grafana
-1. Click **Explore** (compass icon) in Grafana
-2. Select **Loki** data source
-3. Use this query: `{container="grafana-loki-alloy_implementation-weather-app-1"}`
-4. Click **Run Query**
+1. Click Explore (compass icon) in Grafana
+2. Select Loki data source
+3. Use this query: {container="grafana-loki-alloy_implementation-weather-app-1"}
+4. Click Run Query
 
 ### 4. Generate Test Logs
 ```bash
@@ -31,7 +31,37 @@ curl http://localhost:5001/weather
 # Or visit in browser: http://localhost:5001/weather
 ```
 
-## ⚡ Quick Commands Reference
+## Testing
+
+This project includes testing:
+
+### Run Tests
+```bash
+# Install testing dependencies
+pip install -r requirements.txt
+
+# Run all tests with coverage
+pytest
+
+# Run specific test categories
+pytest -m unit          # Unit tests only
+pytest -m integration   # Integration tests only
+pytest -m api           # API tests only
+```
+
+### Test Coverage
+- Unit Tests: Weather API functionality, log generation, error handling
+- Integration Tests: Docker services, Loki API, log collection pipeline
+- Coverage Target: ≥80% overall coverage
+
+### Test Categories
+- Weather API Tests: Flask endpoints, business logic, data validation
+- Integration Tests: Service health, log pipeline, configuration validation
+- Docker Tests: Service configuration, port mapping, health checks
+
+Detailed Testing Guide: See the test files in the tests/ directory.
+
+## Quick Commands Reference
 
 ### Start/Stop Services
 ```bash
@@ -87,7 +117,7 @@ for i in {1..5}; do curl http://localhost:5001/weather; sleep 2; done
 curl http://localhost:5001/status
 ```
 
-## 📊 Working Log Queries
+## Working Log Queries
 
 Use these queries in Grafana Explore:
 
@@ -111,12 +141,14 @@ Use these queries in Grafana Explore:
 {container="grafana-loki-alloy_implementation-weather-app-1"} |= "London"
 ```
 
-## 🔧 Troubleshooting
+Complete Query Examples: [example-queries.md](example-queries.md)
+
+## Troubleshooting
 
 ### "No logs volume available" Error
-**Solution:** Use the correct label in your query:
-- ❌ Wrong: `{source="weather-api"}`
-- ✅ Correct: `{container="grafana-loki-alloy_implementation-weather-app-1"}`
+Solution: Use the correct label in your query:
+- Wrong: {source="weather-api"}
+- Correct: {container="grafana-loki-alloy_implementation-weather-app-1"}
 
 ### Services Not Starting
 ```bash
@@ -158,27 +190,27 @@ sleep 30
 curl http://localhost:5001/weather
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 ```
-Weather API (Flask) → Alloy → Loki → Grafana
+Weather API (Flask) -> Alloy -> Loki -> Grafana
 ```
 
-- **Weather API:** Python Flask app that fetches real weather data
-- **Alloy:** Collects logs from Docker containers
-- **Loki:** Stores and indexes the logs
-- **Grafana:** Visualizes and queries the logs
+- Weather API: Python Flask app that fetches real weather data
+- Alloy: Collects logs from Docker containers
+- Loki: Stores and indexes the logs
+- Grafana: Visualizes and queries the logs
 
-## 🔧 Services
+## Services
 
 | Service | Port | Purpose | Status Check |
 |---------|------|---------|--------------|
-| Weather API | 5001 | Generates weather logs | `curl http://localhost:5001/status` |
-| Grafana | 3000 | Log visualization | `curl http://localhost:3000` |
-| Loki | 3100 | Log storage | `curl http://localhost:3100/ready` |
-| Alloy | 12345 | Log collection | `curl http://localhost:12345/ready` |
+| Weather API | 5001 | Generates weather logs | curl http://localhost:5001/status |
+| Grafana | 3000 | Log visualization | curl http://localhost:3000 |
+| Loki | 3100 | Log storage | curl http://localhost:3100/ready |
+| Alloy | 12345 | Log collection | curl http://localhost:12345/ready |
 
-## 📝 Log Types Generated
+## Log Types Generated
 
 ### Info Logs
 - API requests: "Fetching weather data for [city]"
@@ -194,39 +226,43 @@ Weather API (Flask) → Alloy → Loki → Grafana
 - Timeout errors: "Timeout error fetching weather for [city]"
 - Connection errors: "Connection error fetching weather for [city]"
 
-## 🌍 Monitored Cities
+## Monitored Cities
 
 The service monitors weather for these cities:
 - London, New York, Tokyo, Paris, Sydney
 - Berlin, Moscow, Beijing, Mumbai, Cairo
 - Rio de Janeiro, Mexico City, Toronto, Seoul, Bangkok
 
-## 🎯 Manual Testing
+## Manual Testing
 
 Trigger weather API calls manually:
-- **Random city:** http://localhost:5001/weather
-- **Specific city:** http://localhost:5001/weather/London
-- **Service status:** http://localhost:5001/status
+- Random city: http://localhost:5001/weather
+- Specific city: http://localhost:5001/weather/London
+- Service status: http://localhost:5001/status
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Docker
 - Docker Compose
+- Python 3.8+ (for testing)
 
-## 📄 Files
+## Files
 
-- `docker-compose.yml` - Service definitions
-- `config.alloy` - Alloy log collection configuration
-- `app.py` - Weather API Flask application
-- `loki-config.yaml` - Loki storage configuration
-- `requirements.txt` - Python dependencies
-- `Dockerfile` - Weather app container build
+- docker-compose.yml - Service definitions
+- config.alloy - Alloy log collection configuration
+- app.py - Weather API Flask application
+- loki-config.yaml - Loki storage configuration
+- requirements.txt - Python dependencies
+- Dockerfile - Weather app container build
+- tests/ - Comprehensive test suite
+- example-queries.md - LogQL query examples
 
-## 🚨 Important Notes
+## Important Notes
 
-1. **Use the correct labels:** The logs use `container` labels, not `source` labels
-2. **Wait for startup:** Services may take 30-60 seconds to fully start
-3. **Generate logs:** Visit http://localhost:5001/weather to generate test logs
-4. **Check status:** Use the quick commands above to verify everything is working
+1. Use the correct labels: The logs use container labels, not source labels
+2. Wait for startup: Services may take 30-60 seconds to fully start
+3. Generate logs: Visit http://localhost:5001/weather to generate test logs
+4. Check status: Use the quick commands above to verify everything is working
+5. Run tests: Use pytest to verify functionality and get coverage reports
 
 
